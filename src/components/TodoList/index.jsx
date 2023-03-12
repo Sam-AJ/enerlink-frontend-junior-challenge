@@ -1,28 +1,34 @@
-import TodoListItem from 'components/TodoListItem';
-import { useSelector } from 'react-redux';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { getTodosAsync } from '../../store/slice/thunks';
+
+import TodoListItem from '../TodoListItem';
+
 import './styles.css';
 
 const TodoList = () => {
+  const dispatch = useDispatch();
+
   const todos = useSelector((state) => state.todos);
 
-  const handleDelete = (todoId) => {
-    // Fix an ability to delete task
-  };
-
-  const toggleCheck = (todoId, isChecked) => {
-    // Fix an ability to toggle task
-  };
+  useEffect(() => {
+    dispatch(getTodosAsync());
+  }, [dispatch]);
 
   return (
     <div className="todo-list">
       <span className="todo-list-title">Things to do:</span>
       <div>
-        {todos.map((todo) => (
-          <TodoListItem label={todo.title}/>
-        ))}
-      </div>
-      <div className="no-todos">
-        Looks like you&apos;re absolutely free today!
+        {
+          todos.length
+            ? todos.map((todo) => (
+              <TodoListItem key={todo.id} id={todo.id} label={todo.label} checked={todo.checked} />
+            ))
+            :
+            <div className="no-todos">
+              Looks like you&apos;re absolutely free today!
+            </div>
+        }
       </div>
     </div>
   );

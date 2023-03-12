@@ -1,25 +1,44 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { addTodoAsync, deleteTodoAsync, getTodosAsync, toggleCheckAsync } from './thunks';
 
 export const todoSlice = createSlice({
     name: 'todos',
-    initialState: [
-        { id: 1, title: 'Fix an ability to display all tasks', done: false },
-        { id: 2, title: 'Fix a layout, checkboxes should be listed in a column', done: false },
-        { id: 3, title: 'Fix an ability to add a new task', done: false },
-        { id: 4, title: 'Fix an ability to toggle a task', done: false },
-        { id: 5, title: 'Fix an ability to delete a task', done: false },
-        { id: 6, title: 'Fix an ability to count completed tasks', done: false },
-    ],
+    initialState: [],
     reducers: {
         addTodo: (state, action) => {
             const newTodo = {
                 id: Date.now(),
-                title: action.payload.title,
-                done: false
+                label: action.payload.label,
+                checked: false
             }
             state.push(newTodo);
+        },
+        toggleCheck: (state, action) => {
+            const index = state.findIndex((todo) => todo.id === action.payload.id);
+            state[index].checked = action.payload.checked;
+        },
+        deleteTodo: (state, action) => {
+            return state.filter((todo) => todo.id !== action.payload.id);
         }
+    },
+    extraReducers: (builder) => {
+        builder.addCase(getTodosAsync.fulfilled, (state, action) => {
+            return action.payload.todos
+        })
+        builder.addCase(addTodoAsync.fulfilled, (state, action) => {
+            state.push(action.payload.todo);
+        })
+        builder.addCase(toggleCheckAsync.fulfilled, (state, action) => {
+            const index = state.findIndex((todo) => todo.id === action.payload.id);
+            state[index].checked = action.payload.checked;
+        })
+        builder.addCase(deleteTodoAsync.fulfilled, (state, action) => {
+            return state.filter((todo) => todo.id !== action.payload.id);
+        })
+        builder.addCase(deleteTodoAsync.rejected, (state, action) => {
+            state.error = action.payload;
+        })
     }
 });
 
-export const { addTodo } = todoSlice.actions;
+export const { addTodo, deleteTodo, toggleCheck } = todoSlice.actions;
